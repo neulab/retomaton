@@ -178,6 +178,8 @@ class SequenceScorer(object):
                 'alignment': alignment,
                 'positional_scores': avg_probs_i,
                 'dstore_keys': decoder_out[1][self.args.knn_keytype][start_idxs[i]:,i,:] if self.args.save_knnlm_dstore else None,
+                'queries': bd[1][self.args.knn_keytype][:, i][start_idxs[i]:start_idxs[i] + tgt_len] if self.args.knnlm else None,
+                'start_idx': start_idxs[i],
             }])
         return hypos
 
