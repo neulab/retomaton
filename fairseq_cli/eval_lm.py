@@ -12,6 +12,9 @@ import logging
 import math
 import os
 
+if '--local' in os.sys.argv:
+    import faiss
+
 import torch
 import numpy as np
 
@@ -160,7 +163,7 @@ def main(parsed_args):
             if args.dstore_fp16:
                 print('Saving fp16')
                 dstore_keys = np.memmap(args.dstore_mmap+'_keys.npy', dtype=np.float16, mode='w+', shape=(args.dstore_size, args.decoder_embed_dim))
-                dstore_vals = np.memmap(args.dstore_mmap+'_vals.npy', dtype=np.int16, mode='w+', shape=(args.dstore_size, 1))
+                dstore_vals = np.memmap(args.dstore_mmap+'_vals.npy', dtype=np.int, mode='w+', shape=(args.dstore_size, 1))
             else:
                 print('Saving fp32')
                 dstore_keys = np.memmap(args.dstore_mmap+'_keys.npy', dtype=np.float32, mode='w+', shape=(args.dstore_size, args.decoder_embed_dim))

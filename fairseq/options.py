@@ -492,6 +492,10 @@ def add_eval_lm_args(parser):
                        help='save keys for the knnlm datastore')
     group.add_argument('--dstore-mmap', default=None, type=str,
                        help='If saving knnlm dstore, save keys and values to this file')
+    group.add_argument('--min-knns', default=1, type=int)
+    group.add_argument('--max-knns', default=None, type=int)                       
+    group.add_argument('--local', action='store_true')
+    group.add_argument('--no-pointer', action='store_true')
     # fmt: on
 
 
