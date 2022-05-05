@@ -120,7 +120,7 @@ class SequenceScorer(object):
                     raise ValueError('Only knn *log* probs are supported.')
 
                 yhat_knn_prob = dstore.get_knn_log_prob(
-                        queries.permute(1, 0, 2),
+                        queries.permute(1, 0, 2).contiguous(),
                         orig_target,
                         pad_idx=self.pad)
                 yhat_knn_prob = yhat_knn_prob.squeeze(-1)
