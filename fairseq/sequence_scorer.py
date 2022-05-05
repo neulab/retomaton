@@ -41,7 +41,7 @@ class SequenceScorer(object):
         if self.members is None or self.cluster is None:
             self.extend_pointers_using_clusters = lambda pointers: pointers
         self.max_knns = self.args.max_knns if self.args.max_knns is not None else self.args.dstore_size
-        
+        self.lookup_after_history = []        
         
 
     @torch.no_grad()
@@ -194,6 +194,7 @@ class SequenceScorer(object):
 
             cur_knns = np.array([], dtype=np.int64)
             cur_dists = np.array([], dtype=np.float32)
+            no_lookup_counter = 0
 
             probs_per_timestep = []
             for i in range(queries.size(0)):
@@ -204,6 +205,10 @@ class SequenceScorer(object):
 
                 if self.args.no_pointer or cur_knns.size < self.args.min_knns:
                     perform_search = True
+                    self.lookup_after_history.append(no_lookup_counter)
+                    no_lookup_counter = 0
+                else:
+                    no_lookup_counter += 1
 
                 extended_pointers = pointers
                 if pointers.size >= self.max_knns:

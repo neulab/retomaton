@@ -178,7 +178,8 @@ def main(parsed_args):
 
             gen_timer.start()
             if args.knnlm:
-                hypos = scorer.generate(models, sample, knn_dstore=knn_dstore)
+                hypos = scorer.generate(models, sample)
+                hypos = scorer.score_with_knnlm(hypos=hypos, dstore=knn_dstore)
             else:
                 hypos = scorer.generate(models, sample)
             gen_timer.stop(sample['ntokens'])
@@ -195,7 +196,7 @@ def main(parsed_args):
                             dstore_keys[dstore_idx:shape[0]+dstore_idx] = hypo['dstore_keys'].view(
                                 -1, args.decoder_embed_dim).cpu().numpy().astype(np.float16)
                             dstore_vals[dstore_idx:shape[0]+dstore_idx] = hypo['tokens'].view(
-                                -1, 1).cpu().numpy().astype(np.int16)
+                                -1, 1).cpu().numpy().astype(np.int32)
                         else:
                             dstore_keys[dstore_idx:shape[0]+dstore_idx] = hypo['dstore_keys'].view(
                                 -1, args.decoder_embed_dim).cpu().numpy().astype(np.float32)
@@ -274,12 +275,14 @@ def main(parsed_args):
         print("Vals", dstore_vals.shape, dstore_vals.dtype)
 
     avg_nll_loss = -score_sum / count / math.log(2)  # convert to base 2
-    logger.info('Evaluated {} tokens in {:.1f}s ({:.2f} tokens/s)'.format(
-        gen_timer.n, gen_timer.sum, 1. / gen_timer.avg
+    logger.info('Evaluated {} tokens in {:.1f}s ({:.1f} mins) ({:.2f} tokens/s)'.format(
+        gen_timer.n, gen_timer.sum, gen_timer.sum/60, 1. / gen_timer.avg
     ))
     logger.info('Loss (base 2): {:.4f}, Perplexity: {:.2f}'.format(
         avg_nll_loss, 2**avg_nll_loss
     ))
+
+    logger.info(f'Lookups saved: {(1-1/(1+np.mean(scorer.lookup_after_history)))*100}%')
 
     if args.output_word_stats:
         for ws in sorted(word_stats.values(), key=lambda x: x.count, reverse=True):
