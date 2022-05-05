@@ -43,6 +43,14 @@ class SequenceScorer(object):
         self.max_knns = self.args.max_knns if self.args.max_knns is not None else self.args.dstore_size
         self.lookup_after_history = []        
         
+    def combine_knn_and_vocab_probs(self, knn_p, vocab_p, coeff):
+        combine_probs = torch.stack([vocab_p, knn_p], dim=0)
+        coeffs = torch.ones_like(combine_probs)
+        coeffs[0] = np.log(1 - coeff)
+        coeffs[1] = np.log(coeff)
+        curr_prob = torch.logsumexp(combine_probs + coeffs, dim=0)
+
+        return curr_prob
 
     @torch.no_grad()
     def generate(self, models, sample, **kwargs):
@@ -70,15 +78,6 @@ class SequenceScorer(object):
                 index=target.unsqueeze(-1),
             )
             return probs
-
-        def combine_knn_and_vocab_probs(knn_p, vocab_p, coeff):
-            combine_probs = torch.stack([vocab_p, knn_p], dim=0)
-            coeffs = torch.ones_like(combine_probs)
-            coeffs[0] = np.log(1 - coeff)
-            coeffs[1] = np.log(coeff)
-            curr_prob = torch.logsumexp(combine_probs + coeffs, dim=0)
-
-            return curr_prob
 
         orig_target = sample['target']
 
@@ -128,7 +127,7 @@ class SequenceScorer(object):
                     yhat_knn_prob = yhat_knn_prob.half()
                     probs = probs.half()
 
-                probs = combine_knn_and_vocab_probs(
+                probs = self.combine_knn_and_vocab_probs(
                             yhat_knn_prob, probs, self.args.lmbda)
 
             if avg_probs is None:
