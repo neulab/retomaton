@@ -232,7 +232,7 @@ class SequenceScorer(object):
                     cur_dists = dists[vals_are_correct_and_pointer_available]
 
                 combined = self.combine_knn_and_vocab_probs(
-                            cur_knn_log_prob, lm_probs[i].unsqueeze(0), self.args.lmbda, dstore)
+                            cur_knn_log_prob, lm_probs[i].unsqueeze(0), self.args.lmbda)
                 probs_per_timestep.append(combined[0])
 
             
