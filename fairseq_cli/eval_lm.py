@@ -178,8 +178,8 @@ def main(parsed_args):
 
             gen_timer.start()
             if args.knnlm:
-                hypos = scorer.generate(models, sample, knn_dstore=knn_dstore)
-                # hypos = scorer.score_with_knnlm(hypos=hypos, dstore=knn_dstore)
+                hypos = scorer.generate(models, sample)
+                hypos = scorer.score_with_knnlm(hypos=hypos, dstore=knn_dstore)
             else:
                 hypos = scorer.generate(models, sample)
             gen_timer.stop(sample['ntokens'])
