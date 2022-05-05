@@ -488,6 +488,8 @@ def add_eval_lm_args(parser):
     group.add_argument('--knnlm', action='store_true',
                        help='use the k-nearest neighbors language model')
     group.add_argument('--knnlm-gpu', action='store_true')
+    group.add_argument('--cluster', default=None, type=str)
+    group.add_argument('--members', default=None, type=str)
     group.add_argument('--save-knnlm-dstore', action='store_true',
                        help='save keys for the knnlm datastore')
     group.add_argument('--dstore-mmap', default=None, type=str,
