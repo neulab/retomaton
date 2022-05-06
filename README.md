@@ -1,47 +1,79 @@
-# Nearest Neighbor Language Models
+# RetoMaton: Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval
 
-This repository is a fork of the [Fairseq](https://github.com/pytorch/fairseq) repository and the exact commit that this code is based on can be found [here](https://github.com/pytorch/fairseq/tree/6a5181509aa1fa7d260985157e77211753da544b). Please use the exact commit page to determine software requirements for using this code. This README will be updated once the code has been merged into Fairseq.
+A neuro-symbolic language model, based on a base neural-LM and an automaton that retrieves examples from the training data.
+This is an official implementation of the model described in:
 
-This code pertains to the ICLR 2020 paper: [Generalization through Memorization: Nearest Neighbor Language Models](https://arxiv.org/pdf/1911.00172.pdf). If you use this code or results from our paper, please cite:
+[Uri Alon](https://urialon.ml/), [Frank F. Xu](https://frankxfz.me/), [Junxian He](https://jxhe.github.io/), [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/), [Dan Roth](https://www.cis.upenn.edu/~danroth/), and [Graham Neubig](http://www.phontron.com/), "Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval", [PDF](https://arxiv.org/pdf/2201.12431.pdf)
 
+This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and based on the [fairseq](https://github.com/pytorch/fairseq) framework.
+
+## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf))
+<center style="padding: 40px"><img width="100%" src="images/fig1.png" /></center>
+
+Table of Contents
+=================
+  * [Requirements](#requirements)
+  * [Quickstart](#quickstart)
+  * [Extending to other datasets](#extending-to-other-datasets)
+  * [Citation](#citation)
+
+## Requirements
+
+### Dependencies
+* This project is based on python3 and PyTorch 1.9.0. To check PyTorch version:
+```python
+python3 -c 'import torch; print(torch.__version__)
 ```
-@inproceedings{khandelwal20generalization,
-  title={{Generalization through Memorization: Nearest Neighbor Language Models}},
-  author={Khandelwal, Urvashi and Levy, Omer and Jurafsky, Dan and Zettlemoyer, Luke and Lewis, Mike},
-  booktitle={International Conference on Learning Representations (ICLR)},
-  year={2020}
-}
+
+* The project also depends on the `faiss` library. We recommend using the GPU version of `faiss`:
 ```
+pip install faiss-gpu
+```
+The CPU version can be installed using `pip install faiss`.
 
-## Note on kNN-MT (Nearest Neighbor Machine Translation)
-Note that the code for kNN-MT is not yet available. I've just graduated (yay!) and will be offline for a few months, and will work on providing it after.  
-__Edit__: An early release of the code has been made available [here](https://github.com/urvashik/knnmt).
-
-
-## Wikitext-103 Experiments
-
-Before starting, make sure you install Fairseq (after pulling the code, from the project directory) and [FAISS](https://github.com/facebookresearch/faiss/wiki):
+* Finally, from this project's directory, run:
 ```bash
 pip install --editable .
-
-pip install faiss
 ```
 
-### A Note about Hardware
+### Hardware
+Experiments for this paper were conducted on a machine that contains 16GB of RAM, and a single NVIDIA RTX 3090 GPU. 
 
-Experiments for this paper were conducted on machines that contain 500GB of RAM, NVIDIA V100 32GB GPUs and flash storage (SSDs). Saving the Wikitext-103 datastore requires 400GB of disk space. The speed of saving the datastore, building the FAISS index and evaluating the nearest neighbors language model heavily depends on the amount of RAM available for each job. Some of these steps can be sped up by parallelizing, which we leave for users to do in order to best cater to their setup.
+Saving the Wikitext-103 datastore requires 200GB of disk space (in fp16, which does not degrade the performance compared to fp32).
 
-If you are working with a remote cluster, please note that we use [memmaps](https://numpy.org/doc/1.18/reference/generated/numpy.memmap.html) for saving the datastore. This allows us to keep the data on disk while accessing it by loading small chunks into memory, depending on the available RAM. This means there are a large number of disk seeks. In order to prevent slowing down your entire cluster, we suggest always reading/writing this data to/from local disks (as opposed to NFS directories), and flash storage is best for faster access.
+## Quickstart
 
-### Preparing the data
+### Step 0: Clone this repository:
+```bash
+git clone https://github.com/urialon/retomaton
+cd retomaton
+```
+
+### Step 1: Preparing the data
+
+You can either download our preprocessed Wikitext-103 and Law-MT datasets, or preprocess them yourself.
+
+#### Download the preprocessed Wikitext-103 dataset:
+```bash
+wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/wiki103_preprocessed.tar.gz
+tar -xzvf wiki103_preprocessed.tar.gz
+```
+
+#### Download the preprocessed Law-MT dataset:
+```bash
+wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/law_preprocessed.tar.gz
+tar -xzvf law_preprocessed.tar.gz
+```
+
+#### Preprocessing the dataset (not needed if you already downloaded our preprocessed dataset):
 
 We share Fairseq's instructions on how to prepare the data here.
 
+##### Preprocessing Wikitext-103:
 ```bash
 cd examples/language_model/
 bash prepare-wikitext-103.sh
 cd ../..
-
 
 TEXT=examples/language_model/wikitext-103
 python preprocess.py \
@@ -53,9 +85,46 @@ python preprocess.py \
     --workers 20
 ```
 
-### Training the Language Model
+##### Preprocessing Law-MT:
+The data is originally from: [https://github.com/roeeaharoni/unsupervised-domain-clusters](https://github.com/roeeaharoni/unsupervised-domain-clusters).
+We used the `law/` subdirectory, and only the English "source" files.
+Then, we re-tokenized the dataset using the model's BPE tokenizer.
 
-We share Fairseq's instructions on how to train the language model here. Alternatively, you can download the checkpoint used for our experiments [here](https://nlp.stanford.edu/projects/knnlm/wt103_checkpoint_best.pt). 
+The tokenized dataset can be downloaded from: 
+```
+wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/law_tokenized.tar.gz
+tar -xzvf law_tokenized.tar.gz
+```
+
+and then preprocessing it can be performed using:
+
+```
+TEXT=datasets/law
+python preprocess.py \
+    --only-source \
+    --trainpref $TEXT/train.tokenized \
+    --validpref $TEXT/dev.en.tokenized \
+    --testpref $TEXT/test.en.tokenized \
+    --destdir data-bin/law \
+    --workers 20
+```
+
+
+### Download the Base Language Model
+
+The models that we used can be downloaded from the following sources:
+For Wikitext-103:
+```
+wget https://nlp.stanford.edu/projects/knnlm/wt103_checkpoint_best.pt
+```
+
+For Law-MT:
+```
+wget https://dl.fbaipublicfiles.com/fairseq/models/lm/wmt19.en.tar.gz
+tar -xzvf wmt19.en.tar.gz
+```
+
+We also share Fairseq's instructions on how to train the language model here:
 
 ```bash
 python train.py --task language_modeling \
@@ -74,64 +143,183 @@ This model was trained on 8 gpus.
 
 To evaluate the model on the validation set:
 
+For Wikitext-103:
 ```bash
 python eval_lm.py data-bin/wikitext-103 \
-    --path checkpoints/checkpoint_best.pt \
+    --path checkpoints/wt103/wt103_checkpoint_best.pt \
     --sample-break-mode complete --max-tokens 3072 \
     --context-window 2560 --softmax-batch 1024 \
     --gen-subset valid
 ```
 
+For Law-MT:
+```bash
+python eval_lm.py data-bin/law \
+    --sample-break-mode eos \
+    --path checkpoints/law/wmt19.en/model.pt \
+    --max-tokens 2048 --context-window 0 \
+    --gen-subset valid --remove-bpe
+```
+
+Notice that the main difference between the datasets is that in Law-MT we use the flags `--remove-bpe` and `--sample-break-mode eos`, and also the `--max-tokens` and `--context-window` values are different.
+
 ### Saving the keys and values for the datastore
 
 In order to save keys and values for the datastore, we must run model evaluation over the entire training set. 
 
-**Caution**: Running this step requires a large amount of disk space (400GB!). Please read the note about hardware above, before running this! 
+#### For Wikitext-103:
+**Caution**: Running this step requires 200GB of disk space 
 
 ```bash
 python eval_lm.py data-bin/wikitext-103 \
-    --path checkpoints/checkpoint_best.pt \
+    --path checkpoints/wt103/wt103_checkpoint_best.pt \
     --sample-break-mode none --max-tokens 3072 \
     --softmax-batch 1024 --gen-subset train \
     --context-window 1536 --tokens-per-sample 1536 \
-    --dstore-mmap checkpoints/dstore --knn-keytype 'last_ffn_input' \
+    --dstore-mmap checkpoints/wt103/dstore16 --knn-keytype 'last_ffn_input' \
     --dstore-size 103225485 --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
-    --save-knnlm-dstore --fp16
+    --save-knnlm-dstore --fp16 --dstore-fp16
 ```
 
 The total number of tokens in the Wikitext-103 training set is `103227021`. The dstore size `103225485` is `1536` tokens less than the total due to the context-window. We want each key to be constructed using a minimum amount of prior context.
 
-If you would prefer to save the keys and values in float16, please use the `--dstore-fp16` flag and remember to use it during the index building and evaluation steps as well.
+#### For Law-MT:
+Following the instructions and using the code of [https://github.com/jxhe/efficient-knnlm](https://github.com/jxhe/efficient-knnlm), we created the datastore using their code:
+```
+cd ../efficient-knnlm
+python eval_lm.py ../retomaton/data-bin/law \
+    --path ../retomaton/checkpoints/law/wmt19.en/model.pt \
+    --sample-break-mode eos --max-tokens 2048 \
+    --softmax-batch 1024 --gen-subset train \
+    --context-window 0 --tokens-per-sample 512 \
+    --dstore-mmap ../retomaton/checkpoints/law/dstore16 --knn-keytype 'last_ffn_input' \
+    --dstore-size 19068709  \
+    --log-interval 100 \
+    --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
+    --fp16 --dstore-fp16 \
+    --save-knnlm-dstore 
+```
 
 ### Building the FAISS index
 
-The FAISS index requires a training stage where it learns a set of clusters for the keys. Once this is completed, the keys must all be added to the index. The speed of adding keys to the index depends on the hardware, particularly the amount of RAM available. Please check the paper for more details on our use of FAISS.
+The FAISS index requires a training stage where it learns an index for the keys. 
+Once this is completed, the keys must all be added to the index. The speed of adding keys to the index depends on the hardware, particularly the amount of RAM available. 
 
-Note that the following command runs on CPU.
+For Wikitext-103:
+```
+DSTORE=checkpoints/wt103/dstore16
+DSTORE_SIZE=103225485
+INDEX=checkpoints/wt103/knn16.index
+```
 
+For Law-MT:
+```
+DSTORE=checkpoints/law/dstore16
+DSTORE_SIZE=19068709
+INDEX=checkpoints/law/knn16.index
+```
+
+and then for both datasets:
 ```bash
 python build_dstore.py \
-    --dstore_mmap checkpoints/dstore \
-    --dstore_size 103225485 \
-    --faiss_index checkpoints/knn.index \
+    --dstore_mmap ${DSTORE} \
+    --dstore_size ${DSTORE_SIZE} \
+    --faiss_index ${INDEX} \
     --num_keys_to_add_at_a_time 500000 \
     --starting_point 0
 ```
 
-### Evaluating the Nearest Neighbor Language Model
+
+### Evaluating RetoMaton without clustering:
 
 To evaluate the model on the validation set:
 
+#### Wikitext-103:
+
+
 ```bash
+DSTORE=checkpoints/wt103/dstore16
+DSTORE_SIZE=103225485
+INDEX=checkpoints/wt103/knn16.index
+MODEL=checkpoints/wt103/wt103_checkpoint_best.pt
+
 python eval_lm.py data-bin/wikitext-103 \
-    --path checkpoints/checkpoint_best.pt \
+    --path ${MODEL} \
     --sample-break-mode complete --max-tokens 3072 \
-    --context-window 2560 --softmax-batch 1024 \
-    --gen-subset valid --dstore-filename checkpoints/dstore \
-    --indexfile checkpoints/knn.index  \
+    --context-window 2560 --softmax-batch 1024000 \
+    --gen-subset valid --dstore-filename ${DSTORE} \
+    --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
-    --k 1024 --lmbda 0.25 --dstore-size 103225485 --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16
+    --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
+    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
+    --knnlm-gpu --min-knns 1 --max-knns 1024 \
+    --no-pointer
 ```
 
-If your hardware constraints make this too slow, you can run it without using full precision keys by adding two flags: `--no-load-keys` and `--knn-sim-func "do_not_recomp_l2"`. This uses the quantized versions of keys stored within the FAISS index. You can make things faster by reducing the value of the `probe` (the number of clusters FAISS checks for neighbors) at the cost of performance. You can also try reducing the number of neighbors `k`.
+To encourage the model to perform a full kNN search more frequently and thus increase accuracy and reduce perplexity, use a larger value of `--min-knns` such as `100`. Using `--min-knns 9999999` makes the model perform kNN search at every step (`FoSS = 0` in Figure 3 of the paper), and achieves the best results at the cost of slower speed.
+
+To run the baseline kNN-LM, remove the flag `--no-pointer`.
+
+#### Law-MT:
+```bash
+DSTORE=checkpoints/law/dstore16
+DSTORE_SIZE=19068709
+INDEX=checkpoints/law/knn16.index
+MODEL=checkpoints/law/wmt19.en/model.pt
+
+python eval_lm.py data-bin/law \
+    --path ${MODEL} \
+    --sample-break-mode eos --max-tokens 2048 \
+    --context-window 0 --softmax-batch 1024000 \
+    --gen-subset valid --dstore-filename ${DSTORE} \
+    --indexfile ${INDEX}  \
+    --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
+    --k 1024 --lmbda 0.9 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
+    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
+    --remove-bpe \
+    --knnlm-gpu --min-knns 1 --max-knns 1024 \
+    --no-pointer
+```
+
+Notice that the difference betweens between the datasets is that in Law-MT we use the flags `--remove-bpe` and `--sample-break-mode eos`, and also the `--max-tokens` and `--context-window` values are different.
+Further, as found by [He et al., 2021](), the interpolation coefficient should be set to `--lmbda 0.9`, to give more weight to the datastore than the base LM.
+
+### Adding clustering:
+
+
+## Evaluating the Fine-tuned Model
+The model that was fine-tuned on Law-MT can be downloaded from:
+```bash
+wget https://zenodo.org/record/6525426/files/law_finetuned.pt
+```
+
+Then, the same steps as before should be run on the Law-MT datasets, except that the file `law_finetuned.pt` should be used as the checkpoint, rather than the file `checkpoints/law/wmt19.en/model.pt`.
+
+**Note**: constructing RetoMaton on top of the fine-tuned model requires [saving the keys and values for the datastore again](#saving-the-keys-and-values-for-the-datastore) using the fine-tuned checkpoint, and then [building a new FAISS index](#building-the-faiss-index) using the fine-tuned checkpoint.
+
+Finally, [evaluate](#evaluating-retomaton-without-clustering) using the fine-tuned checkpoint. 
+**It is important** to also set `--lmbda 0.25` when using the fine-tuned model: since the model is fine-tuned, we can rely on it more than before. See a clarification at [#lambda-values](#lambda-values)
+
+Best results with the fine-tuned model are achieved _without_ clustering (that is, every datastore entry is a singleton cluster).
+
+## Lambda values
+In all configurations, the interpolation factor `lmbda` is set to `0.25`, except when the base LM is `checkpoints/law/wmt19.en/model.pt` and the model is evaluated on Law-MT, since this scenario tests domain adaptation, and thus `lmbda` should be set to `0.9`.
+
+## Zenodo link: 
+Checkpoints and datasets can be downloaded from here:
+[https://zenodo.org/record/6525426](https://zenodo.org/record/6525426)
+
+## Citation
+
+[Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval](https://arxiv.org/pdf/2201.12431.pdf)
+
+```
+@article{alon2022neuro,
+  title={Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval},
+  author={Alon, Uri and Xu, Frank F and He, Junxian and Sengupta, Sudipta and Roth, Dan and Neubig, Graham},
+  journal={arXiv preprint arXiv:2201.12431},
+  year={2022}
+}
+```
