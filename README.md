@@ -10,11 +10,45 @@ This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and
 ## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf))
 <center style="padding: 40px"><img width="100%" src="images/fig1.png" /></center>
 
+## Results
+*WikiText-103:*
+
+| Method      | ppl | tokens/s     |
+| :---        |    ----:   |          ---: |
+| NLM      | 18.66       | 5559   |
+| kNN-LM (faiss-cpu)   | 16.65        | 281      |
+| kNN-LM (faiss-gpu)   | 16.65        | 3204    |
+| efficient kNN-LM (faiss-cpu)   | 16.67        | 2015    |
+| efficient kNN-LM (faiss-gpu)   | 16.67        | 4528    |
+
+*Law-MT:*
+
+| Method      | ppl | tokens/s     |
+| :---        |    ----:   |          ---: |
+| NLM      | 106.56       | 38.2K   |
+| kNN-LM (faiss-cpu)   | 12.64        | 1230      |
+| kNN-LM (faiss-gpu)   | 12.32        | 5781    |
+| efficient kNN-LM (faiss-cpu)   | 12.29        | 6037  |
+| efficient kNN-LM (faiss-gpu)   | 12.03        | 9214  |
+
+
 Table of Contents
 =================
+  * [Overview](#overview-figure-1-from-the-paper)
+  * [Results](#results)
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
-  * [Extending to other datasets](#extending-to-other-datasets)
+  * [Step 1: Preparing the data](#step-1-preparing-the-data)
+  * [Step 2: Download the Base Language Model](#step-2-download-the-base-language-model)
+  * [Step 3: Evaluating the Language Model](#step-3-evaluating-the-Language-Model)
+  * [Step 4: Saving the keys and values for the datastore](#step-4-saving-the-keys-and-values-for-the-datastore)
+  * [Step 5: Building the FAISS index](#step-5-building-the-faiss-index)
+  * [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering)
+  * [Step 7: Adding clustering](#step-7-adding-clustering)
+  * [Evaluating the Fine-tuned Model](#evaluating-the-fine-tuned-model)
+  * [Lambda values](#lambda-values)
+  * [Zenodo link](#zenodo-link)
+  * [Differences from the kNN-LM implementation](#differences-from-the-knn-lm-implementation)
   * [Citation](#citation)
 
 ## Requirements
@@ -110,7 +144,7 @@ python preprocess.py \
 ```
 
 
-### Download the Base Language Model
+### Step 2: Download the Base Language Model
 
 The models that we used can be downloaded from the following sources:
 For Wikitext-103:
@@ -139,7 +173,7 @@ python train.py --task language_modeling \
 
 This model was trained on 8 gpus.
 
-### Evaluating the Language Model
+### Step 3: Evaluating the Language Model
 
 To evaluate the model on the validation set:
 
@@ -163,7 +197,7 @@ python eval_lm.py data-bin/law \
 
 Notice that the main difference between the datasets is that in Law-MT we use the flags `--remove-bpe` and `--sample-break-mode eos`, and also the `--max-tokens` and `--context-window` values are different.
 
-### Saving the keys and values for the datastore
+### Step 4: Saving the keys and values for the datastore
 
 In order to save keys and values for the datastore, we must run model evaluation over the entire training set. 
 
@@ -200,7 +234,7 @@ python eval_lm.py ../retomaton/data-bin/law \
     --save-knnlm-dstore 
 ```
 
-### Building the FAISS index
+### Step 5: Building the FAISS index
 
 The FAISS index requires a training stage where it learns an index for the keys. 
 Once this is completed, the keys must all be added to the index. The speed of adding keys to the index depends on the hardware, particularly the amount of RAM available. 
@@ -230,7 +264,7 @@ python build_dstore.py \
 ```
 
 
-### Evaluating RetoMaton without clustering:
+### Step 6: Evaluating RetoMaton without clustering
 
 To evaluate the model on the validation set:
 
@@ -286,7 +320,7 @@ python eval_lm.py data-bin/law \
 Notice that the difference betweens between the datasets is that in Law-MT we use the flags `--remove-bpe` and `--sample-break-mode eos`, and also the `--max-tokens` and `--context-window` values are different.
 Further, as found by [He et al., 2021](), the interpolation coefficient should be set to `--lmbda 0.9`, to give more weight to the datastore than the base LM.
 
-### Adding clustering:
+### Step 7: Adding clustering
 
 
 ## Evaluating the Fine-tuned Model
@@ -310,6 +344,15 @@ In all configurations, the interpolation factor `lmbda` is set to `0.25`, except
 ## Zenodo link: 
 Checkpoints and datasets can be downloaded from here:
 [https://zenodo.org/record/6525426](https://zenodo.org/record/6525426)
+
+
+## Differences from the kNN-LM implementation
+* The original [kNN-LM](https://github.com/urvashik/knnlm) repository uses `faiss` CPU to perform retrieval. However, we added the flag `--knnlm-gpu` that allows performing retrieval much faster on the GPU.
+* After each retrieval, the original [kNN-LM](https://github.com/urvashik/knnlm) repository loads the found keys and re-computes the distance from the query to each nearest neighbor. This is much more time consuming, unless loading all the keys (200GB) into memory.
+We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem`.
+
+
+
 
 ## Citation
 
