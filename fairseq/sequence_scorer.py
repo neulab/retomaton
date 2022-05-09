@@ -24,23 +24,21 @@ class SequenceScorer(object):
         self.compute_alignment = compute_alignment
         self.args = args
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-        if args.cluster is None:
-            self.cluster = None
-            print('No clustering is used.')
-        else:
-            self.cluster = np.load(args.cluster)
         
         if args.members is None:
             self.members = None
-            print('No cluster-members file is used.')
+            print('No clustering is used.')
         else:
             with open(args.members, 'rb') as file:
                 self.members = pickle.load(file)
+            members_for_indices = np.nonzero(self.members[np.arange(self.members.shape[0])])
+
+            self.cluster = np.zeros((args.dstore_size, ), dtype=np.int64)
+            self.clusters[members_for_indices[1]] = members_for_indices[0]
         
         if self.members is None or self.cluster is None:
             self.extend_pointers_using_clusters = lambda pointers: pointers
-        self.max_knns = self.args.max_knns if self.args.max_knns is not None else self.args.dstore_size
+        self.max_knns = self.args.k if self.args.max_knns is None else self.args.max_knns
         self.lookup_after_history = []        
         
     def combine_knn_and_vocab_probs(self, knn_p, vocab_p, coeff):

@@ -28,8 +28,8 @@ This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and
 *Law-MT, with a base LM that was fine-tuned on Law-MT:*
 
 | Method      | ppl | ppl, saving 50% of the searches     |
-| :---        |    ----:   |          ---: |
-| Fine-tuned LM      | <td colspan=2>8.61          |
+| :---        |    ----:   |     ---: |
+| Fine-tuned LM      | 8.61 | 8.61    |
 | kNN-LM      | 7.93        | 8.25    |
 | AdaptRet baseline (He et al., 2021)   | 7.81        | 7.91    |
 | RetoMaton (this work) | **7.10** |  **7.15**|
@@ -328,6 +328,8 @@ Further, as found by [He et al., 2021](), the interpolation coefficient should b
 For the Greedy Merge clustering algorithm. See [the code of He et al. (2021)](https://github.com/jxhe/efficient-knnlm/blob/main/ef_knnlm/dstore_compression/greedy_merge.sh). Greedy Merge is much faster and requires much fewer memory than k-means, but results in slightly higher perplexity:
 
 <img width="50%" src="images/clustering_wiki.png" />
+
+See also Figures 8 and 9 in Appendix D in the paper.
 
 
 ## Evaluating the Fine-tuned Model

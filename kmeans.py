@@ -79,11 +79,9 @@ if __name__ == '__main__':
         if (start % 1000000) == 0:
             print('Assigned %d tokens so far' % start)
 
-    # print(np.concatenate(dists).shape)
-    # np.save(args.centroids + '_dist.npy', np.concatenate(dists))
     centroid_ids = np.concatenate(centroid_ids)
     centroid_ids_filename = f'{args.centroids}_centroid_ids.npy'
-    np.save(centroid_ids_filename, centroid_ids)
+    # np.save(centroid_ids_filename, centroid_ids)
 
     print('Saved centroid assignments, processing the mapping of cluster->members')
 
