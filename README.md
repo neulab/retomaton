@@ -3,7 +3,13 @@
 A neuro-symbolic language model, based on a base neural-LM and an automaton that retrieves examples from the training data.
 This is an official implementation of the model described in:
 
-[Uri Alon](https://urialon.ml/), [Frank F. Xu](https://frankxfz.me/), [Junxian He](https://jxhe.github.io/), [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/), [Dan Roth](https://www.cis.upenn.edu/~danroth/), and [Graham Neubig](http://www.phontron.com/), "Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval", [PDF](https://arxiv.org/pdf/2201.12431.pdf)
+[Uri Alon](https://urialon.ml/), [Frank F. Xu](https://frankxfz.me/), [Junxian He](https://jxhe.github.io/), [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/), [Dan Roth](https://www.cis.upenn.edu/~danroth/), and [Graham Neubig](http://www.phontron.com/), \
+["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
+
+
+_**May 2022**_ - 
+
+_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=MOhWCb4cqjo)
 
 This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and based on the [fairseq](https://github.com/pytorch/fairseq) framework.
 
@@ -13,23 +19,20 @@ This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and
 ## Results
 *WikiText-103:*
 
-| Method      | ppl | tokens/s     |
-| :---        |    ----:   |          ---: |
-| NLM      | 18.66       | 5559   |
-| kNN-LM (faiss-cpu)   | 16.65        | 281      |
-| kNN-LM (faiss-gpu)   | 16.65        | 3204    |
-| efficient kNN-LM (faiss-cpu)   | 16.67        | 2015    |
-| efficient kNN-LM (faiss-gpu)   | 16.67        | 4528    |
+<img width="50%" src="images/wiki.png" />
 
-*Law-MT:*
+*Law-MT, with a based LM that was trained on WMT News Crawl:*
 
-| Method      | ppl | tokens/s     |
+<img width="50%" src="images/law.png" />
+
+*Law-MT, with a base LM that was fine-tuned on Law-MT:*
+
+| Method      | ppl | ppl, saving 50% of the searches     |
 | :---        |    ----:   |          ---: |
-| NLM      | 106.56       | 38.2K   |
-| kNN-LM (faiss-cpu)   | 12.64        | 1230      |
-| kNN-LM (faiss-gpu)   | 12.32        | 5781    |
-| efficient kNN-LM (faiss-cpu)   | 12.29        | 6037  |
-| efficient kNN-LM (faiss-gpu)   | 12.03        | 9214  |
+| Fine-tuned LM      | <td colspan=2>8.61          |
+| kNN-LM      | 7.93        | 8.25    |
+| AdaptRet baseline (He et al., 2021)   | 7.81        | 7.91    |
+| RetoMaton (this work) | **7.10** |  **7.15**|
 
 
 Table of Contents
@@ -38,21 +41,21 @@ Table of Contents
   * [Results](#results)
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
-  * [Step 1: Preparing the data](#step-1-preparing-the-data)
-  * [Step 2: Download the Base Language Model](#step-2-download-the-base-language-model)
-  * [Step 3: Evaluating the Language Model](#step-3-evaluating-the-Language-Model)
-  * [Step 4: Saving the keys and values for the datastore](#step-4-saving-the-keys-and-values-for-the-datastore)
-  * [Step 5: Building the FAISS index](#step-5-building-the-faiss-index)
-  * [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering)
-  * [Step 7: Adding clustering](#step-7-adding-clustering)
-  * [Evaluating the Fine-tuned Model](#evaluating-the-fine-tuned-model)
+    * [Step 1: Preparing the data](#step-1-preparing-the-data)
+    * [Step 2: Download the Base Language Model](#step-2-download-the-base-language-model)
+    * [Step 3: Evaluating the Language Model](#step-3-evaluating-the-Language-Model)
+    * [Step 4: Saving the keys and values for the datastore](#step-4-saving-the-keys-and-values-for-the-datastore)
+    * [Step 5: Building the FAISS index](#step-5-building-the-faiss-index)
+    * [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering)
+    * [Step 7: Adding clustering](#step-7-adding-clustering)
+    * [Evaluating the Fine-tuned Model](#evaluating-the-fine-tuned-model)
   * [Lambda values](#lambda-values)
   * [Zenodo link](#zenodo-link)
   * [Differences from the kNN-LM implementation](#differences-from-the-knn-lm-implementation)
   * [Citation](#citation)
 
 ## Requirements
-
+This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and based on the [fairseq](https://github.com/pytorch/fairseq) framework.
 ### Dependencies
 * This project is based on python3 and PyTorch 1.9.0. To check PyTorch version:
 ```python
