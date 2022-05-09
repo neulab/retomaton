@@ -325,6 +325,10 @@ Further, as found by [He et al., 2021](), the interpolation coefficient should b
 
 ### Step 7: Adding clustering
 
+For the Greedy Merge clustering algorithm. See [the code of He et al. (2021)](https://github.com/jxhe/efficient-knnlm/blob/main/ef_knnlm/dstore_compression/greedy_merge.sh). Greedy Merge is much faster and requires much fewer memory than k-means, but results in slightly higher perplexity:
+
+<img width="50%" src="images/clustering_wiki.png" />
+
 
 ## Evaluating the Fine-tuned Model
 The model that was fine-tuned on Law-MT can be downloaded from:
