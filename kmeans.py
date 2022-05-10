@@ -39,9 +39,9 @@ if __name__ == '__main__':
     kmeans = faiss.Kmeans(args.dim, args.num_clusters, niter=niter, verbose=verbose, gpu=True, seed=1)
     kmeans.train(to_cluster)
 
-    centroids_filename = f'{args.save}_s{args.sample}_k{args.num_clusters}_centroids.npy'
-    np.save(centroids_filename, kmeans.centroids)
-    print(f'Saved centroids to {centroids_filename}')
+    # centroids_filename = f'{args.save}_s{args.sample}_k{args.num_clusters}_centroids.npy'
+    # np.save(centroids_filename, kmeans.centroids)
+    # print(f'Saved centroids to {centroids_filename}')
 
     # Finished training the k-means clustering,
     # Now we assign each data point to its closest centroid
@@ -80,10 +80,10 @@ if __name__ == '__main__':
             print('Assigned %d tokens so far' % start)
 
     centroid_ids = np.concatenate(centroid_ids)
-    centroid_ids_filename = f'{args.centroids}_centroid_ids.npy'
+    # centroid_ids_filename = f'{args.centroids}_centroid_ids.npy'
     # np.save(centroid_ids_filename, centroid_ids)
 
-    print('Saved centroid assignments, processing the mapping of cluster->members')
+    print('Processing the mapping of cluster->members')
 
     parent_cluster = centroid_ids
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     col_ind = [i for ids in cluster_to_members.values() for i in ids]
     members_sp = sp.csr_matrix(([1]*len(row_ind), (row_ind, col_ind)))
 
-    members_filename = args.centroids + '_members.pkl'
+    members_filename = f'{args.save}_s{args.sample}_k{args.num_clusters}_members.pkl'
     with open(members_filename, 'wb') as f:
         pickle.dump(members_sp, f)
 

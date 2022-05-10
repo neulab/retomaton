@@ -34,7 +34,7 @@ class SequenceScorer(object):
             members_for_indices = np.nonzero(self.members[np.arange(self.members.shape[0])])
 
             self.cluster = np.zeros((args.dstore_size, ), dtype=np.int64)
-            self.clusters[members_for_indices[1]] = members_for_indices[0]
+            self.cluster[members_for_indices[1]] = members_for_indices[0]
         
         if self.members is None or self.cluster is None:
             self.extend_pointers_using_clusters = lambda pointers: pointers
