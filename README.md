@@ -7,7 +7,7 @@ This is an official implementation of the model described in:
 ["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
 
 
-_**May 2022**_ - 
+_**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022.
 
 _**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=MOhWCb4cqjo)
 
@@ -43,7 +43,7 @@ Table of Contents
   * [Quickstart](#quickstart)
     * [Step 1: Preparing the data](#step-1-preparing-the-data)
     * [Step 2: Download the Base Language Model](#step-2-download-the-base-language-model)
-    * [Step 3: Evaluating the Language Model](#step-3-evaluating-the-Language-Model)
+    * [Step 3: Evaluating the base Language Model](#step-3-evaluating-the-base-language-model)
     * [Step 4: Saving the keys and values for the datastore](#step-4-saving-the-keys-and-values-for-the-datastore)
     * [Step 5: Building the FAISS index](#step-5-building-the-faiss-index)
     * [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering)
@@ -176,9 +176,9 @@ python train.py --task language_modeling \
 
 This model was trained on 8 gpus.
 
-### Step 3: Evaluating the Language Model
+### Step 3: Evaluating the base Language Model
 
-To evaluate the model on the validation set:
+To evaluate the base model on the validation set (without any retrieval):
 
 For Wikitext-103:
 ```bash
