@@ -516,7 +516,12 @@ python eval_lm.py data-bin/law \
 
 
 ## Lambda values
-In all configurations, the interpolation factor `lmbda` is set to `0.25`, except when the base LM is `checkpoints/law/wmt19.en/model.pt` and the model is evaluated on Law-MT, since this scenario tests domain adaptation, and thus `lmbda` should be set to `0.9`.
+In all configurations, the interpolation factor `lmbda` is set to `0.25`, except when the base LM is `checkpoints/law/wmt19.en/model.pt` **and** the model is evaluated on Law-MT, since this scenario tests domain adaptation, and thus `lmbda` should be set to `0.9`:
+
+|             | `wt103_checkpoint_best.pt` | `wmt19.en/model.pt`     | `finetuned.pt` |
+| :---        |    ----:   |     ---: | ---: |
+| Wikitext-103| 0.25       | -    |   -   |
+| Law-MT      | -       | 0.9    |   0.25 |
 
 ## All files: 
 Checkpoints and datasets can be downloaded from here:
