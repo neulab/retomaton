@@ -86,6 +86,8 @@ Saving the Wikitext-103 datastore requires 200GB of disk space (in fp16, which d
 ```bash
 git clone https://github.com/neulab/retomaton
 cd retomaton
+mkdir -p checkpoints/wt103
+mkdir -p checkpoints/law
 ```
 
 ### Step 1: Preparing the data
@@ -131,8 +133,11 @@ Then, we re-tokenized the dataset using the model's BPE tokenizer.
 
 The tokenized dataset can be downloaded from: 
 ```
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_tokenized.tar.gz
+mkdir -p datasets/law
+wget -P datasets/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/law_tokenized.tar.gz
+cd datasets/law
 tar -xzvf law_tokenized.tar.gz
+cd ../../
 ```
 
 and then preprocessing it can be performed using:
@@ -154,13 +159,15 @@ python preprocess.py \
 The models that we used can be downloaded from the following sources:
 For Wikitext-103:
 ```
-wget https://nlp.stanford.edu/projects/knnlm/wt103_checkpoint_best.pt
+wget -P checkpoints/wt103/ https://nlp.stanford.edu/projects/knnlm/wt103_checkpoint_best.pt
 ```
 
 For Law-MT:
 ```
-wget https://dl.fbaipublicfiles.com/fairseq/models/lm/wmt19.en.tar.gz
+wget -P checkpoints/law/ https://dl.fbaipublicfiles.com/fairseq/models/lm/wmt19.en.tar.gz
+cd checkpoints/law
 tar -xzvf wmt19.en.tar.gz
+cd ..
 ```
 
 We also share Fairseq's instructions on how to train the language model here:
@@ -208,16 +215,16 @@ The next step is to run model evaluation over the entire training set, and save 
 
 #### To download the keys and values that we already saved for Wikitext-103:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_vals.npy
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_keys.npy
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_vals.npy
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_keys.npy
 ```
 
 **Note**: The keys of Wikitext-103 take 200GB of disk space 
 
 #### To download the keys and values that we already saved for Law-MT:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_vals.npy
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_keys.npy
+wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_vals.npy
+wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_keys.npy
 ```
 
 #### To save keys and values (not needed if you already downloaded our keys and values):
@@ -262,12 +269,12 @@ Once this is completed, the keys must all be added to the index. The speed of ad
 To download our index:
 #### Wikitext-103:
 ```
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/knn16.index
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/knn16.index
 ```
 
 #### For Law-MT:
 ```
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/knn.19048862.index
+wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/knn.19048862.index
 ``` 
 
 
@@ -360,25 +367,25 @@ See also Figures 8 and 9 in Appendix D in the paper.
 #### To download our clusters for Wikitext-103:
 Note that only **one** of the following files is needed. For the main experiments in the paper, we used:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s40000000_k1000000_members.pkl
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s40000000_k1000000_members.pkl
 ```
 
 but additional clusterings are available as well:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s20000000_k500000_members.pkl
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge15_members_sp.pkl
-wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge29_members.pkl
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s20000000_k500000_members.pkl
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge15_members_sp.pkl
+wget -P checkpoints/wt103/ https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge29_members.pkl
 ```
 
 #### To download our clusters for Law-MT:
 Note that only **one** of the following files is needed. For the main experiments in the paper, we used:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k200000_members.pkl
+wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k200000_members.pkl
 ```
 
 but additional clustering is available as well:
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k400000_members.pkl
+wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k400000_members.pkl
 ```
 
 #### Evaluating RetoMaton with clustering:
@@ -464,11 +471,12 @@ python kmeans.py --dstore ${DSTORE} --dstore-size ${DSTORE_SIZE} --num-clusters 
 The model that was fine-tuned on Law-MT, along with its corresponding datastore, FAISS index and clustering can be downloaded from:
 
 ```bash
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/finetuned.pt
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_vals.npy
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_keys.npy
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/knn_finetuned.index
-wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_finetuned_clusters_s20000000_k200000_members.pkl
+mkdir checkpoints/law-finetuned/
+wget -P checkpoints/law-finetuned/ https://retomaton.s3.us-east-2.amazonaws.com/law/finetuned.pt
+wget -P checkpoints/law-finetuned/ https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_vals.npy
+wget -P checkpoints/law-finetuned/ https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_keys.npy
+wget -P checkpoints/law-finetuned/ https://retomaton.s3.us-east-2.amazonaws.com/law/knn_finetuned.index
+wget -P checkpoints/law-finetuned/ https://retomaton.s3.us-east-2.amazonaws.com/law/law_finetuned_clusters_s20000000_k200000_members.pkl
 ```
 
 Finally, [evaluate](#evaluating-retomaton-without-clustering) using the fine-tuned checkpoint, datastore, and index. 
@@ -486,11 +494,11 @@ Then, the same steps as before should be run on the Law-MT datasets, except that
 That is:
 
 ```bash
-DSTORE=checkpoints/law/dstore16_finetuned_size19068709_embed1536_fp16
+DSTORE=checkpoints/law-finetuned/dstore16_finetuned_size19068709_embed1536_fp16
 DSTORE_SIZE=19068709
-INDEX=checkpoints/law/knn_finetuned.index
-MODEL=checkpoints/law/finetuned.pt
-MEMBERS=checkpoints/law/law_finetuned_clusters_s20000000_k200000_members.pkl
+INDEX=checkpoints/law-finetuned/knn_finetuned.index
+MODEL=checkpoints/law-finetuned/finetuned.pt
+MEMBERS=checkpoints/law-finetuned/law_finetuned_clusters_s20000000_k200000_members.pkl
 
 python eval_lm.py data-bin/law \
     --path ${MODEL} \
