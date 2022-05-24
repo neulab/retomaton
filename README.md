@@ -3,17 +3,19 @@
 A neuro-symbolic language model, based on a base neural-LM and an automaton that retrieves examples from the training data.
 This is an official implementation of the model described in:
 
-[Uri Alon](https://urialon.ml/), [Frank F. Xu](https://frankxfz.me/), [Junxian He](https://jxhe.github.io/), [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/), [Dan Roth](https://www.cis.upenn.edu/~danroth/), and [Graham Neubig](http://www.phontron.com/), \
-["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
+[Uri Alon](https://urialon.ml/){:target="_blank"}, [Frank F. Xu](https://frankxfz.me/){:target="_blank"}, [Junxian He](https://jxhe.github.io/){:target="_blank"}, [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/){:target="_blank"}, [Dan Roth](https://www.cis.upenn.edu/~danroth/){:target="_blank"}, and [Graham Neubig](http://www.phontron.com/){:target="_blank"}, \
+["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf){:target="_blank"}
 
 
 _**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022.
 
-_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=MOhWCb4cqjo)
+_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=-Au42BuWTEc){:target="_blank"}
 
-This repository is a fork of the [kNN-LM](https://github.com/urvashik/knnlm) and based on the [fairseq](https://github.com/pytorch/fairseq) framework.
 
-## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf))
+Feel free to create [new issues](https://github.com/neulab/retomaton/issues) with any questions.
+
+
+## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf){:target="_blank"})
 <center style="padding: 40px"><img width="100%" src="images/fig1.png" /></center>
 
 ## Results
@@ -42,15 +44,15 @@ Table of Contents
   * [Requirements](#requirements)
   * [Quickstart](#quickstart)
     * [Step 1: Preparing the data](#step-1-preparing-the-data)
-    * [Step 2: Download the Base Language Model](#step-2-download-the-base-language-model)
+    * [Step 2: Downloading the base Language Model](#step-2-download-the-base-language-model)
     * [Step 3: Evaluating the base Language Model](#step-3-evaluating-the-base-language-model)
     * [Step 4: Saving the keys and values for the datastore](#step-4-saving-the-keys-and-values-for-the-datastore)
     * [Step 5: Building the FAISS index](#step-5-building-the-faiss-index)
     * [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering)
     * [Step 7: Adding clustering](#step-7-adding-clustering)
-    * [Evaluating the Fine-tuned Model](#evaluating-the-fine-tuned-model)
+    * [Step 8: Evaluating the Fine-tuned Model](#evaluating-the-fine-tuned-model)
   * [Lambda values](#lambda-values)
-  * [Zenodo link](#zenodo-link)
+  * [All files](#all-files)
   * [Differences from the kNN-LM implementation](#differences-from-the-knn-lm-implementation)
   * [Citation](#citation)
 
@@ -82,7 +84,7 @@ Saving the Wikitext-103 datastore requires 200GB of disk space (in fp16, which d
 
 ### Step 0: Clone this repository:
 ```bash
-git clone https://github.com/urialon/retomaton
+git clone https://github.com/neulab/retomaton
 cd retomaton
 ```
 
@@ -92,13 +94,13 @@ You can either download our preprocessed Wikitext-103 and Law-MT datasets, or pr
 
 #### Download the preprocessed Wikitext-103 dataset:
 ```bash
-wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/wiki103_preprocessed.tar.gz
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/wiki103_preprocessed.tar.gz
 tar -xzvf wiki103_preprocessed.tar.gz
 ```
 
 #### Download the preprocessed Law-MT dataset:
 ```bash
-wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/law_preprocessed.tar.gz
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_preprocessed.tar.gz
 tar -xzvf law_preprocessed.tar.gz
 ```
 
@@ -129,7 +131,7 @@ Then, we re-tokenized the dataset using the model's BPE tokenizer.
 
 The tokenized dataset can be downloaded from: 
 ```
-wget https://zenodo.org/api/files/8042535b-8f09-4fc2-b8cf-00b8e90af689/law_tokenized.tar.gz
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_tokenized.tar.gz
 tar -xzvf law_tokenized.tar.gz
 ```
 
@@ -147,7 +149,7 @@ python preprocess.py \
 ```
 
 
-### Step 2: Download the Base Language Model
+### Step 2: Downloading the Base Language Model
 
 The models that we used can be downloaded from the following sources:
 For Wikitext-103:
@@ -202,10 +204,25 @@ Notice that the main difference between the datasets is that in Law-MT we use th
 
 ### Step 4: Saving the keys and values for the datastore
 
-In order to save keys and values for the datastore, we must run model evaluation over the entire training set. 
+The next step is to run model evaluation over the entire training set, and save keys and values.
 
-#### For Wikitext-103:
-**Caution**: Running this step requires 200GB of disk space 
+#### To download the keys and values that we already saved for Wikitext-103:
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_vals.npy
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore16_keys.npy
+```
+
+**Note**: The keys of Wikitext-103 take 200GB of disk space 
+
+#### To download the keys and values that we already saved for Law-MT:
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_vals.npy
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_keys.npy
+```
+
+#### To save keys and values (not needed if you already downloaded our keys and values):
+
+##### for Wikitext-103:
 
 ```bash
 python eval_lm.py data-bin/wikitext-103 \
@@ -220,7 +237,7 @@ python eval_lm.py data-bin/wikitext-103 \
 
 The total number of tokens in the Wikitext-103 training set is `103227021`. The dstore size `103225485` is `1536` tokens less than the total due to the context-window. We want each key to be constructed using a minimum amount of prior context.
 
-#### For Law-MT:
+##### For Law-MT:
 Following the instructions and using the code of [https://github.com/jxhe/efficient-knnlm](https://github.com/jxhe/efficient-knnlm), we created the datastore using their code:
 ```
 cd ../efficient-knnlm
@@ -239,9 +256,22 @@ python eval_lm.py ../retomaton/data-bin/law \
 
 ### Step 5: Building the FAISS index
 
-The FAISS index requires a training stage where it learns an index for the keys. 
+The FAISS index requires a training stage where it learns an index for accessing the keys quickly. 
 Once this is completed, the keys must all be added to the index. The speed of adding keys to the index depends on the hardware, particularly the amount of RAM available. 
 
+To download our index:
+#### Wikitext-103:
+```
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/knn16.index
+```
+
+#### For Law-MT:
+```
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/knn.19048862.index
+``` 
+
+
+#### To build the FAISS index yourself (not needed if you already downloaded our index):
 For Wikitext-103:
 ```
 DSTORE=checkpoints/wt103/dstore16
@@ -266,13 +296,11 @@ python build_dstore.py \
     --starting_point 0
 ```
 
-
 ### Step 6: Evaluating RetoMaton without clustering
 
 To evaluate the model on the validation set:
 
 #### Wikitext-103:
-
 
 ```bash
 DSTORE=checkpoints/wt103/dstore16
@@ -290,13 +318,12 @@ python eval_lm.py data-bin/wikitext-103 \
     --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
     --probe 32 --knnlm --fp16 --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
-    --knnlm-gpu --min-knns 1 --max-knns 1024 \
-    --no-pointer
+    --knnlm-gpu --min-knns 1 --max-knns 1024
 ```
 
 To encourage the model to perform a full kNN search more frequently and thus increase accuracy and reduce perplexity, use a larger value of `--min-knns` such as `100`. Using `--min-knns 9999999` makes the model perform kNN search at every step (`FoSS = 0` in Figure 3 of the paper), and achieves the best results at the cost of slower speed.
 
-To run the baseline kNN-LM, remove the flag `--no-pointer`.
+To run the baseline kNN-LM, add the flag `--no-pointer`.
 
 #### Law-MT:
 ```bash
@@ -316,8 +343,7 @@ python eval_lm.py data-bin/law \
     --probe 32 --knnlm --fp16 --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --remove-bpe \
-    --knnlm-gpu --min-knns 1 --max-knns 1024 \
-    --no-pointer
+    --knnlm-gpu --min-knns 1 --max-knns 1024
 ```
 
 Notice that the difference betweens between the datasets is that in Law-MT we use the flags `--remove-bpe` and `--sample-break-mode eos`, and also the `--max-tokens` and `--context-window` values are different.
@@ -331,28 +357,164 @@ For the Greedy Merge clustering algorithm. See [the code of He et al. (2021)](ht
 
 See also Figures 8 and 9 in Appendix D in the paper.
 
-
-## Evaluating the Fine-tuned Model
-The model that was fine-tuned on Law-MT can be downloaded from:
+#### To download our clusters for Wikitext-103:
+Note that only **one** of the following files is needed. For the main experiments in the paper, we used:
 ```bash
-wget https://zenodo.org/record/6525426/files/law_finetuned.pt
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s40000000_k1000000_members.pkl
 ```
 
-Then, the same steps as before should be run on the Law-MT datasets, except that the file `law_finetuned.pt` should be used as the checkpoint, rather than the file `checkpoints/law/wmt19.en/model.pt`.
+but additional clusterings are available as well:
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/clusters_s20000000_k500000_members.pkl
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge15_members_sp.pkl
+wget https://retomaton.s3.us-east-2.amazonaws.com/wt103/dstore_merge29_members.pkl
+```
 
-**Note**: constructing RetoMaton on top of the fine-tuned model requires [saving the keys and values for the datastore again](#saving-the-keys-and-values-for-the-datastore) using the fine-tuned checkpoint, and then [building a new FAISS index](#building-the-faiss-index) using the fine-tuned checkpoint.
+#### To download our clusters for Law-MT:
+Note that only **one** of the following files is needed. For the main experiments in the paper, we used:
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k200000_members.pkl
+```
 
-Finally, [evaluate](#evaluating-retomaton-without-clustering) using the fine-tuned checkpoint. 
+but additional clustering is available as well:
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_clusters_s40000000_k400000_members.pkl
+```
+
+#### Evaluating RetoMaton with clustering:
+Basically identical to [Step 6: Evaluating RetoMaton without clustering](#step-6-evaluating-retomaton-without-clustering), except that we add the flag `--members <filename>_members.pkl`, 
+
+##### Wikitext-103:
+
+```bash
+DSTORE=checkpoints/wt103/dstore16
+DSTORE_SIZE=103225485
+INDEX=checkpoints/wt103/knn16.index
+MODEL=checkpoints/wt103/wt103_checkpoint_best.pt
+MEMBERS=checkpoints/wt103/clusters_s40000000_k1000000_members.pkl
+
+python eval_lm.py data-bin/wikitext-103 \
+    --path ${MODEL} \
+    --sample-break-mode complete --max-tokens 3072 \
+    --context-window 2560 --softmax-batch 1024000 \
+    --gen-subset valid --dstore-filename ${DSTORE} \
+    --indexfile ${INDEX}  \
+    --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
+    --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
+    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
+    --knnlm-gpu --min-knns 1 --max-knns 1024 \
+    --members ${MEMBERS}
+```
+
+##### Law-MT:
+```bash
+DSTORE=checkpoints/law/dstore16
+DSTORE_SIZE=19068709
+INDEX=checkpoints/law/knn16.index
+MODEL=checkpoints/law/wmt19.en/model.pt
+MEMBERS=checkpoints/law/law_clusters_s40000000_k200000_members.pkl
+
+python eval_lm.py data-bin/law \
+    --path ${MODEL} \
+    --sample-break-mode eos --max-tokens 2048 \
+    --context-window 0 --softmax-batch 1024000 \
+    --gen-subset valid --dstore-filename ${DSTORE} \
+    --indexfile ${INDEX}  \
+    --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
+    --k 1024 --lmbda 0.9 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
+    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
+    --remove-bpe \
+    --knnlm-gpu --min-knns 1 --max-knns 1024\
+    --members ${MEMBERS}
+```
+
+
+#### Cluster the keys yourself (not needed if you downloaded our clusters):
+for Wikitext-103:
+```
+DSTORE=checkpoints/wt103/dstore16
+DSTORE_SIZE=103225485
+NUM_CLUSTERS=1000000
+SAMPLE=40000000
+DIM=1024
+SAVE=kmeans_wt103
+```
+
+For Law-MT:
+```bash
+DSTORE=checkpoints/law/dstore16
+DSTORE_SIZE=19068709
+NUM_CLUSTERS=200000
+SAMPLE=40000000
+DIM=1536
+SAVE=kmeans_law
+```
+
+And then for both datasets:
+
+```bash
+python kmeans.py --dstore ${DSTORE} --dstore-size ${DSTORE_SIZE} --num-clusters ${NUM_CLUSTERS} --sample ${SAMPLE} --dim ${DIM} --save ${}
+```
+
+
+
+## Step 8: Evaluating the Fine-tuned Model
+The model that was fine-tuned on Law-MT, along with its corresponding datastore, FAISS index and clustering can be downloaded from:
+
+```bash
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/finetuned.pt
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_vals.npy
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/dstore16_finetuned_size19068709_embed1536_fp16_keys.npy
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/knn_finetuned.index
+wget https://retomaton.s3.us-east-2.amazonaws.com/law/law_finetuned_clusters_s20000000_k200000_members.pkl
+```
+
+Finally, [evaluate](#evaluating-retomaton-without-clustering) using the fine-tuned checkpoint, datastore, and index. 
+
 **It is important** to also set `--lmbda 0.25` when using the fine-tuned model: since the model is fine-tuned, we can rely on it more than before. See a clarification at [#lambda-values](#lambda-values)
 
 Best results with the fine-tuned model are achieved _without_ clustering (that is, every datastore entry is a singleton cluster).
 
+Then, the same steps as before should be run on the Law-MT datasets, except that: 
+* `finetuned.pt` should be used as the `${MODEL}`
+* `dstore16_finetuned_size19068709_embed1536_fp16` should be used as the `${DSTORE}`
+* `knn_finetuned.index` should be used as the `${INDEX}`
+* `law_finetuned_clusters_s20000000_k200000_members.pkl` shoould be used as`${MEMBERS}`
+
+That is:
+
+```bash
+DSTORE=checkpoints/law/dstore16_finetuned_size19068709_embed1536_fp16
+DSTORE_SIZE=19068709
+INDEX=checkpoints/law/knn_finetuned.index
+MODEL=checkpoints/law/finetuned.pt
+MEMBERS=checkpoints/law/law_finetuned_clusters_s20000000_k200000_members.pkl
+
+python eval_lm.py data-bin/law \
+    --path ${MODEL} \
+    --sample-break-mode eos --max-tokens 2048 \
+    --context-window 0 --softmax-batch 1024000 \
+    --gen-subset valid --dstore-filename ${DSTORE} \
+    --indexfile ${INDEX}  \
+    --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
+    --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
+    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
+    --remove-bpe \
+    --knnlm-gpu --min-knns 1 --max-knns 1024
+```
+
+
 ## Lambda values
 In all configurations, the interpolation factor `lmbda` is set to `0.25`, except when the base LM is `checkpoints/law/wmt19.en/model.pt` and the model is evaluated on Law-MT, since this scenario tests domain adaptation, and thus `lmbda` should be set to `0.9`.
 
-## Zenodo link: 
+## All files: 
 Checkpoints and datasets can be downloaded from here:
 [https://zenodo.org/record/6525426](https://zenodo.org/record/6525426)
+
+And also from the [AWS S3 bucket](https://retomaton.s3.us-east-2.amazonaws.com/) 
 
 
 ## Differences from the kNN-LM implementation
