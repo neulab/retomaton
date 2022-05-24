@@ -3,19 +3,19 @@
 A neuro-symbolic language model, based on a base neural-LM and an automaton that retrieves examples from the training data.
 This is an official implementation of the model described in:
 
-[Uri Alon](https://urialon.ml/){:target="_blank"}, [Frank F. Xu](https://frankxfz.me/){:target="_blank"}, [Junxian He](https://jxhe.github.io/){:target="_blank"}, [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/){:target="_blank"}, [Dan Roth](https://www.cis.upenn.edu/~danroth/){:target="_blank"}, and [Graham Neubig](http://www.phontron.com/){:target="_blank"}, \
-["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf){:target="_blank"}
+[Uri Alon](https://urialon.ml/), [Frank F. Xu](https://frankxfz.me/), [Junxian He](https://jxhe.github.io/), [Sudipta Sengupta](https://people.csail.mit.edu/sudipta/), [Dan Roth](https://www.cis.upenn.edu/~danroth/), and [Graham Neubig](http://www.phontron.com/), \
+["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
 
 
 _**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022.
 
-_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=-Au42BuWTEc){:target="_blank"}
+_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=-Au42BuWTEc)
 
 
 Please let us know if anything here is not working as expected, and feel free to create [new issues](https://github.com/neulab/retomaton/issues) with any questions.
 
 
-## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf){:target="_blank"})
+## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf))
 <center style="padding: 40px"><img width="100%" src="images/fig1.png" /></center>
 
 ## Results
@@ -512,14 +512,14 @@ In all configurations, the interpolation factor `lmbda` is set to `0.25`, except
 
 ## All files: 
 Checkpoints and datasets can be downloaded from here:
-[https://zenodo.org/record/6525426](https://zenodo.org/record/6525426){:target="_blank"}
+[https://zenodo.org/record/6525426](https://zenodo.org/record/6525426)
 
-And also from the [AWS S3 bucket](https://retomaton.s3.us-east-2.amazonaws.com/){:target="_blank"} 
+And also from the [AWS S3 bucket](https://retomaton.s3.us-east-2.amazonaws.com/) 
 
 
 ## Differences from the kNN-LM implementation
-* The original [kNN-LM](https://github.com/urvashik/knnlm){:target="_blank"} repository uses `faiss` CPU to perform retrieval. However, we added the flag `--knnlm-gpu` that allows performing retrieval much faster on the GPU.
-* After each retrieval, the original [kNN-LM](https://github.com/urvashik/knnlm){:target="_blank"} repository loads the found keys and re-computes the distance from the query to each nearest neighbor. This is much more time consuming, unless loading all the keys (200GB) into memory.
+* The original [kNN-LM](https://github.com/urvashik/knnlm) repository uses `faiss` CPU to perform retrieval. However, we added the flag `--knnlm-gpu` that allows performing retrieval much faster on the GPU.
+* After each retrieval, the original [kNN-LM](https://github.com/urvashik/knnlm) repository loads the found keys and re-computes the distance from the query to each nearest neighbor. This is much more time consuming, unless loading all the keys (200GB) into memory.
 We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem`.
 
 
@@ -527,7 +527,7 @@ We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dst
 
 ## Citation
 
-[Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval](https://arxiv.org/pdf/2201.12431.pdf){:target="_blank"}
+[Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval](https://arxiv.org/pdf/2201.12431.pdf)
 
 ```
 @article{alon2022neuro,
