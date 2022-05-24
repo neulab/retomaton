@@ -108,7 +108,7 @@ tar -xzvf law_preprocessed.tar.gz
 
 #### Preprocessing the dataset (not needed if you already downloaded our preprocessed dataset):
 
-We share Fairseq's instructions on how to prepare the data here.
+We include Fairseq's instructions on how to prepare the data here.
 
 ##### Preprocessing Wikitext-103:
 ```bash
@@ -170,7 +170,7 @@ tar -xzvf wmt19.en.tar.gz
 cd ..
 ```
 
-We also share Fairseq's instructions on how to train the language model here:
+We also include Fairseq's instructions on how to train the language model here:
 
 ```bash
 python train.py --task language_modeling \
@@ -179,7 +179,7 @@ python train.py --task language_modeling \
     --arch transformer_lm_wiki103 \
     --max-update 286000 --max-lr 1.0 --t-mult 2 --lr-period-updates 270000 --lr-scheduler cosine --lr-shrink 0.75 \
     --warmup-updates 16000 --warmup-init-lr 1e-07 --min-lr 1e-09 --optimizer nag --lr 0.0001 --clip-norm 0.1 \
-    --criterion adaptive_loss --max-tokens 3072 --update-freq 3 --tokens-per-sample 3072 --seed 1 --fp16 \
+    --criterion adaptive_loss --max-tokens 3072 --update-freq 3 --tokens-per-sample 3072 --seed 1 \
     --sample-break-mode none --skip-invalid-size-inputs-valid-test --ddp-backend=no_c10d
 ```
 
@@ -194,7 +194,7 @@ For Wikitext-103:
 python eval_lm.py data-bin/wikitext-103 \
     --path checkpoints/wt103/wt103_checkpoint_best.pt \
     --sample-break-mode complete --max-tokens 3072 \
-    --context-window 2560 --softmax-batch 1024 \
+    --context-window 2560 --softmax-batch 1024 --batch-size 2 \
     --gen-subset valid
 ```
 
@@ -203,7 +203,7 @@ For Law-MT:
 python eval_lm.py data-bin/law \
     --sample-break-mode eos \
     --path checkpoints/law/wmt19.en/model.pt \
-    --max-tokens 2048 --context-window 0 \
+    --max-tokens 2048 --context-window 0 --batch-size 2 \
     --gen-subset valid --remove-bpe
 ```
 
@@ -235,11 +235,11 @@ wget -P checkpoints/law/ https://retomaton.s3.us-east-2.amazonaws.com/law/dstore
 python eval_lm.py data-bin/wikitext-103 \
     --path checkpoints/wt103/wt103_checkpoint_best.pt \
     --sample-break-mode none --max-tokens 3072 \
-    --softmax-batch 1024 --gen-subset train \
+    --softmax-batch 1024 --batch-size 2 --gen-subset train \
     --context-window 1536 --tokens-per-sample 1536 \
     --dstore-mmap checkpoints/wt103/dstore16 --knn-keytype 'last_ffn_input' \
     --dstore-size 103225485 --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
-    --save-knnlm-dstore --fp16 --dstore-fp16
+    --save-knnlm-dstore --dstore-fp16
 ```
 
 The total number of tokens in the Wikitext-103 training set is `103227021`. The dstore size `103225485` is `1536` tokens less than the total due to the context-window. We want each key to be constructed using a minimum amount of prior context.
@@ -251,13 +251,13 @@ cd ../efficient-knnlm
 python eval_lm.py ../retomaton/data-bin/law \
     --path ../retomaton/checkpoints/law/wmt19.en/model.pt \
     --sample-break-mode eos --max-tokens 2048 \
-    --softmax-batch 1024 --gen-subset train \
+    --softmax-batch 1024 --batch-size 2 --gen-subset train \
     --context-window 0 --tokens-per-sample 512 \
     --dstore-mmap ../retomaton/checkpoints/law/dstore16 --knn-keytype 'last_ffn_input' \
     --dstore-size 19068709  \
     --log-interval 100 \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
-    --fp16 --dstore-fp16 \
+    --dstore-fp16 \
     --save-knnlm-dstore 
 ```
 
@@ -318,12 +318,12 @@ MODEL=checkpoints/wt103/wt103_checkpoint_best.pt
 python eval_lm.py data-bin/wikitext-103 \
     --path ${MODEL} \
     --sample-break-mode complete --max-tokens 3072 \
-    --context-window 2560 --softmax-batch 1024000 \
+    --context-window 2560 --softmax-batch 1024000 --batch-size 2 \
     --gen-subset valid --dstore-filename ${DSTORE} \
     --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
     --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --probe 32 --knnlm --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --knnlm-gpu --min-knns 1 --max-knns 1024
 ```
@@ -342,12 +342,12 @@ MODEL=checkpoints/law/wmt19.en/model.pt
 python eval_lm.py data-bin/law \
     --path ${MODEL} \
     --sample-break-mode eos --max-tokens 2048 \
-    --context-window 0 --softmax-batch 1024000 \
+    --context-window 0 --softmax-batch 1024000 --batch-size 2 \
     --gen-subset valid --dstore-filename ${DSTORE} \
     --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
     --k 1024 --lmbda 0.9 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --probe 32 --knnlm --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --remove-bpe \
     --knnlm-gpu --min-knns 1 --max-knns 1024
@@ -403,12 +403,12 @@ MEMBERS=checkpoints/wt103/clusters_s40000000_k1000000_members.pkl
 python eval_lm.py data-bin/wikitext-103 \
     --path ${MODEL} \
     --sample-break-mode complete --max-tokens 3072 \
-    --context-window 2560 --softmax-batch 1024000 \
+    --context-window 2560 --softmax-batch 1024000 --batch-size 2 \
     --gen-subset valid --dstore-filename ${DSTORE} \
     --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
     --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --probe 32 --knnlm --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --knnlm-gpu --min-knns 1 --max-knns 1024 \
     --members ${MEMBERS}
@@ -425,12 +425,12 @@ MEMBERS=checkpoints/law/law_clusters_s40000000_k200000_members.pkl
 python eval_lm.py data-bin/law \
     --path ${MODEL} \
     --sample-break-mode eos --max-tokens 2048 \
-    --context-window 0 --softmax-batch 1024000 \
+    --context-window 0 --softmax-batch 1024000 --batch-size 2 \
     --gen-subset valid --dstore-filename ${DSTORE} \
     --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
     --k 1024 --lmbda 0.9 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --probe 32 --knnlm --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --remove-bpe \
     --knnlm-gpu --min-knns 1 --max-knns 1024\
@@ -503,12 +503,12 @@ MEMBERS=checkpoints/law-finetuned/law_finetuned_clusters_s20000000_k200000_membe
 python eval_lm.py data-bin/law \
     --path ${MODEL} \
     --sample-break-mode eos --max-tokens 2048 \
-    --context-window 0 --softmax-batch 1024000 \
+    --context-window 0 --softmax-batch 1024000 --batch-size 2 \
     --gen-subset valid --dstore-filename ${DSTORE} \
     --indexfile ${INDEX}  \
     --model-overrides "{'knn_keytype': 'last_ffn_input'}" \
     --k 1024 --lmbda 0.25 --dstore-size ${DSTORE_SIZE} --knn-keytype last_ffn_input \
-    --probe 32 --knnlm --fp16 --dstore-fp16 \
+    --probe 32 --knnlm --dstore-fp16 \
     --knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem \
     --remove-bpe \
     --knnlm-gpu --min-knns 1 --max-knns 1024
