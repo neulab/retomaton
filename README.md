@@ -460,7 +460,6 @@ SAVE=kmeans_law
 ```
 
 And then for both datasets:
-
 ```bash
 python kmeans.py --dstore ${DSTORE} --dstore-size ${DSTORE_SIZE} --num-clusters ${NUM_CLUSTERS} --sample ${SAMPLE} --dim ${DIM} --save ${}
 ```
@@ -531,6 +530,15 @@ And also from the [AWS S3 bucket](https://retomaton.s3.us-east-2.amazonaws.com/)
 
 
 ## Differences from the kNN-LM implementation
+
+### Implementation Pointers
+Here we point to the code that differs our work from kNN-LM.
+* The main changes are in this
+[commit](https://github.com/neulab/retomaton/commit/89a29d1ac6e8c1360637aa1bfe77a1be227e83cc). The pointers for the next timestep are initially [the current k-nearest neighbors + 1](blob/main/fairseq/sequence_scorer.py#L203). Then we extend each pointer to [consider all entries in its cluster](blob/main/fairseq/sequence_scorer.py#L216). This is [the function](https://github.com/neulab/retomaton/blob/main/fairseq/sequence_scorer.py#L240-L251) that maps each pointer to its cluster, removes duplicate clusters, and then finds the members of each cluster. We  [find the log probabilities](https://github.com/neulab/retomaton/blob/main/fairseq/sequence_scorer.py#L218-L222) as suggested by the new pointers, and finally take to the next timestep - [only the pointers that are consistent](https://github.com/neulab/retomaton/blob/main/fairseq/sequence_scorer.py#L228) with the token that the model eventually predicted.
+* In [this commit](https://github.com/neulab/retomaton/commit/99cb52001b3c87b15dd8ef892172cfac334bcef5) we use the given pointers, or perform kNN search and combine the results with the existing pointers.
+* Performing k-means clustering on millions of vectors can be performed in many ways, but specifically we utilize the `faiss` library to do it using the script [blob/main/kmeans.py](blob/main/kmeans.py)
+
+### Additional minor differences:
 * The original [kNN-LM](https://github.com/urvashik/knnlm) repository uses `faiss` CPU to perform retrieval. However, we added the flag `--knnlm-gpu` that allows performing retrieval much faster on the GPU.
 * After each retrieval, the original [kNN-LM](https://github.com/urvashik/knnlm) repository loads the found keys and re-computes the distance from the query to each nearest neighbor. This is much more time consuming, unless loading all the keys (200GB) into memory.
 We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem`.
