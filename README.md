@@ -544,6 +544,7 @@ Here we point to the code that differs our work from kNN-LM.
 * The original [kNN-LM](https://github.com/urvashik/knnlm) repository uses `faiss` CPU to perform retrieval. However, we added the flag `--knnlm-gpu` that allows performing retrieval much faster on the GPU.
 * After each retrieval, the original [kNN-LM](https://github.com/urvashik/knnlm) repository loads the found keys and re-computes the distance from the query to each nearest neighbor. This is much more time consuming, unless loading all the keys (200GB) into memory.
 We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dstore-to-mem`.
+* When using `faiss-gpu`, it is useful to [`import faiss.contrib.torch_utils`](fairseq/knnlm.py#L3). This allows performing the kNN search using `torch` tensors (rather than only `numpy` arrays). Additionally, sometimes this `import` statement prevents searching bugs in `faiss` (see [this issue](https://github.com/facebookresearch/faiss/issues/2126)).
 
 
 
