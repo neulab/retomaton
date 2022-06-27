@@ -17,7 +17,7 @@ _**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com
 Please let us know if anything here is not working as expected, and feel free to create [new issues](https://github.com/neulab/retomaton/issues) with any questions.
 
 
-## Overviews
+## Overview
 <center style="padding: 40px"><img width="60%" src="images/overview.jpeg" /></center>
 
 ## Results
