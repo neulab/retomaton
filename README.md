@@ -18,7 +18,7 @@ Please let us know if anything here is not working as expected, and feel free to
 
 
 ## Overviews
-<center style="padding: 40px"><img width="100%" src="images/overview.jpeg" /></center>
+<center style="padding: 40px"><img width="60%" src="images/overview.jpeg" /></center>
 
 ## Results
 *WikiText-103:*
