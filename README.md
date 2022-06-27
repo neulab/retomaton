@@ -11,7 +11,7 @@ _**June 2022**_ - [**Overview tweet**!](https://twitter.com/urialon1/status/1532
 
 _**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022.
 
-_**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=-Au42BuWTEc)
+_**April 2022**_ -  a talk **video** is available here: [[1-hour video]](https://www.youtube.com/watch?v=-Au42BuWTEc) [[5-min video]](https://recorder-v3.slideslive.com/?share=69099&s=f862fc4f-577c-4a54-a820-1fbb4786afb9)
 
 
 Please let us know if anything here is not working as expected, and feel free to create [new issues](https://github.com/neulab/retomaton/issues) with any questions.
