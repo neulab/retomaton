@@ -71,6 +71,10 @@ python3 -c 'import torch; print(torch.__version__)
 pip install faiss-gpu
 ```
 The CPU version can be installed using `pip install faiss`.
+On a Macbook, use the Anaconda installation instead:
+```
+conda install -c conda-forge pytorch faiss-cpu
+```
 
 * Finally, from this project's directory, run:
 ```bash
