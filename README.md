@@ -7,6 +7,8 @@ This is an official implementation of the model described in:
 ["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
 
 
+_**June 2022**_ - [**Overview tweet**!](https://twitter.com/urialon1/status/1532371214869708801)
+
 _**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022.
 
 _**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com/watch?v=-Au42BuWTEc)
@@ -15,8 +17,8 @@ _**April 2022**_ -  a talk **video** is available [here](https://www.youtube.com
 Please let us know if anything here is not working as expected, and feel free to create [new issues](https://github.com/neulab/retomaton/issues) with any questions.
 
 
-## Overview: (Figure 1 from [the paper](https://arxiv.org/pdf/2201.12431.pdf))
-<center style="padding: 40px"><img width="100%" src="images/fig1.png" /></center>
+## Overviews
+<center style="padding: 40px"><img width="100%" src="images/overview.jpeg" /></center>
 
 ## Results
 *WikiText-103:*
