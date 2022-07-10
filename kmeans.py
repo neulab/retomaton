@@ -46,13 +46,6 @@ if __name__ == '__main__':
     # Finished training the k-means clustering,
     # Now we assign each data point to its closest centroid
 
-    vals_from_memmap = np.memmap(args.dstore + '_vals.npy',
-                                dtype=np.int64, mode='r', shape=(args.dstore_size, 1))
-    vals = np.zeros((args.dstore_size, 1), dtype=np.int64)
-    vals[:] = vals_from_memmap[:]
-    vals = vals.squeeze()
-    del vals_from_memmap
-
     print('to add:', args.dstore_size)
 
     print('Creating index and adding centroids')
