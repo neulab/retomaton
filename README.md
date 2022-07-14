@@ -7,6 +7,8 @@ This is an official implementation of the model described in:
 ["Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval"](https://arxiv.org/pdf/2201.12431.pdf)
 
 
+_**July 2022**_ - A Hugging Face 🤗 `transformers` implementation of RetoMaton and kNN-LM is available at [https://github.com/neulab/knn-transformers](https://github.com/neulab/knn-transformers)
+
 _**June 2022**_ - [**Overview tweet**!](https://twitter.com/urialon1/status/1532371214869708801)
 
 _**May 2022**_ - The paper was accepted to **ICML'2022**! See you in Baltimore in July 2022 [[Poster here]](https://urialon.ml/files/Retomaton_poster_ICML_2022.pdf)
@@ -532,7 +534,7 @@ In all configurations, the interpolation factor `lmbda` is set to `0.25`, except
 Checkpoints and datasets can be downloaded from here:
 [https://zenodo.org/record/6525426](https://zenodo.org/record/6525426)
 
-And also from the [AWS S3 bucket](https://retomaton.s3.us-east-2.amazonaws.com/) 
+And also from the [AWS S3 bucket](https://retomaton.s3.amazonaws.com/index.html) 
 
 
 ## Differences from the kNN-LM implementation
