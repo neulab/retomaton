@@ -562,10 +562,12 @@ We thus use the flags `--knn-sim-func do_not_recomp_l2 --no-load-keys --move-dst
 [Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval](https://arxiv.org/pdf/2201.12431.pdf)
 
 ```
-@article{alon2022neuro,
+@inproceedings{alon2022neuro,
   title={Neuro-Symbolic Language Modeling with Automaton-augmented Retrieval},
-  author={Alon, Uri and Xu, Frank F and He, Junxian and Sengupta, Sudipta and Roth, Dan and Neubig, Graham},
-  journal={arXiv preprint arXiv:2201.12431},
-  year={2022}
+  author={Alon, Uri and Xu, Frank and He, Junxian and Sengupta, Sudipta and Roth, Dan and Neubig, Graham},
+  booktitle={International Conference on Machine Learning},
+  pages={468--485},
+  year={2022},
+  organization={PMLR}
 }
 ```
